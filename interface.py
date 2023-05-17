@@ -1,57 +1,168 @@
-import tkinter as tk
-import customtkinter as CTk
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QTextEdit, QLineEdit
+import sys
 
 
-class App(CTk.CTk):
+class App(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.geometry("300x500")
-        self.title("Password generator")
-        self.resizable(False, False)
+    # Создание основного окна
+        self.setGeometry(100, 100, 300, 500)
+        self.setWindowTitle("Голосовой помощник Джарвис")
+        self.setFixedSize(300, 500)
 
-        # ? ОБЩИЙ
-        self.tree = CTk.CTkFrame(
-            master=self, fg_color="#092a36")
-        self.tree.grid(row=0,  column=0, padx=(
-            0, 0), pady=(0, 0), sticky="nsew")
+        # Установка нулевых отступов
+        self.layout = QVBoxLayout()
+        self.layout.setContentsMargins(0, 0, 0, 0)
 
-        self.grid_columnconfigure(0, weight=1)
-        # ? upbar_frame
-        self.upbar_frame = CTk.CTkFrame(
-            master=self.tree, fg_color="#011a27")
-        self.upbar_frame.grid(row=1,  column=0, padx=(
-            0, 0), pady=(0, 0), sticky="nsew")
+        #! Создание upbar_frame
+        self.upbar_frame = QWidget()
+        self.upbar_frame.setStyleSheet("background-color: #011a27;")
+        self.upbar_frame.setFixedSize(300, 50)
 
-        self.name = CTk.CTkLabel(
-            master=self.upbar_frame, text="Джарвис", text_color="#99ee44", font=("Roboto", 18))
-        self.name.grid(row=0, column=0, padx=(10, 0))
+        #! Создание заголовка
+        self.name = QLabel("Джарвис")
+        self.name.setStyleSheet(
+            "color: #99ee44; font-size: 18px;font-family: Roboto; font-weight: bold;")
 
-        self.btn_help = CTk.CTkButton(master=self.upbar_frame, fg_color="#99ee44", corner_radius=20, text="", text_color="#ffffff",  hover_color="#7f29ff",  width=40, height=40,
-                                      )
-        self.btn_help.grid(row=0, column=1, padx=(170, 5), pady=(5, 5),)
+        #! Создание кнопки Помощь ?
+        self.btn_help = QPushButton()
+        #! Устанавливаем уникальный идентификатор для кнопки
+        self.btn_help.setObjectName("BtnHelp")
+        self.btn_help.setStyleSheet("""
+            QPushButton#BtnHelp {
+                background-color: #99ee44;
+                border-radius: 17px;
+                font-size: 16px;
+                font-family: Roboto;
+                font-weight: bold;
+            }
 
-        # ? textbox_frame
-        self.textbox_frame = CTk.CTkFrame(
-            master=self.tree, fg_color="#092a36")
-        self.textbox_frame.grid(row=1, column=0, padx=(
-            0, 0), pady=(50, 0), sticky="nsew")
+            QPushButton#BtnHelp:hover {
+                background-color: #59a30f;
+            }
+            
+        """)
+        self.btn_help.setFixedSize(35, 35)
+        self.btn_help.setText("?")
 
-        # ? chat_frame
-        self.chat_frame = CTk.CTkFrame(
-            master=self.tree, fg_color="#011a27")
-        self.chat_frame.grid(row=1, column=0, padx=(
-            0, 0), pady=(450, 0), sticky="nsew")
+        #! Добавление элементов на upbar_frame
+        self.upbar_frame.layout = QHBoxLayout()
+        self.upbar_frame.layout.setContentsMargins(10, 0, 10, 0)
+        self.upbar_frame.layout.addWidget(self.name)
+        self.upbar_frame.layout.addWidget(self.btn_help)
+        self.upbar_frame.setLayout(self.upbar_frame.layout)
 
-        self.entry_message = CTk.CTkEntry(
-            master=self.chat_frame, width=240, height=40, fg_color="#011a27", text_color="#ffffff", font=("Roboto", 14))
-        self.entry_message.grid(row=0, column=0, padx=(5, 10), pady=(5, 5))
+        # ? Создание textbox_frame
+        self.textbox_frame = QWidget()
+        self.textbox_frame.setStyleSheet("background-color: #092a36;")
+        self.textbox_frame.setFixedSize(300, 400)
 
-        self.btn_micro = CTk.CTkButton(master=self.chat_frame, fg_color="#99ee44", corner_radius=20, hover_color="#7f29ff", text="", width=40, height=40,
-                                       )
-        self.btn_micro.grid(row=0, column=1, padx=(0, 5),)
+        # ? Создание text_box
+        self.text_box = QTextEdit()
+        self.text_box.setStyleSheet("""
+            QTextEdit {
+                border: 1px solid #99ee44;
+                border-radius: 5px;
+                color: #99ee44;
+                font-size: 16px;
+                font-family: Roboto;
+                padding :5px;
+
+            }
+            QScrollBar:vertical {
+                width: 10px;
+                background-color: #092a36;
+                border-radius: 5px;
+            }
+            QScrollBar::handle:vertical {
+                background-color: #011a27;
+                border-radius: 5px;
+            }
+            QScrollBar::add-line:vertical,
+            QScrollBar::sub-line:vertical {
+                background-color: #e0e0e0;
+                height: 10px;
+            }
+            QScrollBar::up-arrow:vertical,
+            QScrollBar::down-arrow:vertical {
+                background-color: #999999;
+                height: 10px;
+                width: 10px;
+            }
+            QScrollBar::add-page:vertical,
+            QScrollBar::sub-page:vertical {
+                background-color: #092a36;
+            }
+
+            """)
+
+        # ? Добавление элементов на textbox_frame
+        self.textbox_frame.layout = QHBoxLayout()
+        self.textbox_frame.layout.addWidget(self.text_box)
+        self.textbox_frame.setLayout(self.textbox_frame.layout)
+
+        # # Создание downbar_frame
+        self.downbar_frame = QWidget()
+        self.downbar_frame.setStyleSheet("background-color: #011a27;")
+        self.downbar_frame.setFixedSize(300, 50)
+
+        # # Создание заголовка
+        self.text_edit = QLineEdit()
+        self.text_edit.setFixedSize(225, 30)
+        self.text_edit.setStyleSheet("""
+            QLineEdit {
+                background-color: #092a36;
+                border: 1px solid #99ee44;
+                border-radius: 5px;
+                color: #99ee44;
+                font-size: 14px;
+                font-family: Roboto;
+                padding :5px;
+
+            }""")
+
+        # # Создание кнопки "Говорить"
+        self.btn_micro = QPushButton()
+        # # Устанавливаем уникальный идентификатор для кнопки
+        self.btn_micro.setObjectName("BtnMicro")
+        self.btn_micro.setStyleSheet("""
+            QPushButton#BtnMicro {
+                background-color: #99ee44;
+                border-radius: 17px;
+                font-size: 14px;
+                font-family: Roboto;
+                font-weight: bold;
+            }
+
+            QPushButton#BtnMicro:hover {
+                background-color: #59a30f;
+            }
+        """)
+        self.btn_micro.setFixedSize(35, 35)
+        self.btn_micro.setText("J")
+
+        # # Добавление элементов на upbar_frame
+        self.downbar_frame.layout = QHBoxLayout()
+        self.downbar_frame.layout.setContentsMargins(10, 0, 10, 0)
+        self.downbar_frame.layout.addWidget(self.text_edit)
+        self.downbar_frame.layout.addWidget(self.btn_micro)
+        self.downbar_frame.setLayout(self.downbar_frame.layout)
+
+        # Установка выравнивания виджета вверху
+        self.layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.layout.setSpacing(0)
+        # Добавление дочернего виджета в компоновщик
+        self.layout.addWidget(self.upbar_frame)
+        self.layout.addWidget(self.textbox_frame)
+        self.layout.addWidget(self.downbar_frame)
+        # Установка компоновщика для родительского виджета
+        self.setLayout(self.layout)
 
 
 if __name__ == "__main__":
-    app = App()
-    app.mainloop()
+    app = QApplication(sys.argv)
+    window = App()
+    window.show()
+    sys.exit(app.exec())
