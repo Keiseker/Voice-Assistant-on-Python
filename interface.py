@@ -1,6 +1,23 @@
-from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QTextEdit, QLineEdit
+from PyQt6.QtCore import Qt, QThread, pyqtSignal
+from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QListWidget, QLineEdit
+
+import recognizeNew as rn
 import sys
+
+
+class VoiceAssistantThread(QThread):
+    finished = pyqtSignal()
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.stopped = False
+
+    def stop(self):
+        self.stopped = True
+
+    def run(self):
+        rn.main()
+        self.finished.emit()
 
 
 class App(QWidget):
@@ -60,7 +77,7 @@ class App(QWidget):
         self.textbox_frame.setFixedSize(300, 400)
 
         # ? Создание text_box
-        self.text_box = QTextEdit()
+        self.text_box = QListWidget()
         self.text_box.setStyleSheet("""
             QTextEdit {
                 border: 1px solid #99ee44;
@@ -108,7 +125,7 @@ class App(QWidget):
         self.downbar_frame.setStyleSheet("background-color: #011a27;")
         self.downbar_frame.setFixedSize(300, 50)
 
-        # # Создание заголовка
+        # # Создание поля ввода
         self.text_edit = QLineEdit()
         self.text_edit.setFixedSize(225, 30)
         self.text_edit.setStyleSheet("""
@@ -142,8 +159,10 @@ class App(QWidget):
         """)
         self.btn_micro.setFixedSize(35, 35)
         self.btn_micro.setText("J")
+        self.btn_micro.setCheckable(True)
+        self.btn_micro.clicked.connect(self.start_voice_assistant)
 
-        # # Добавление элементов на upbar_frame
+        # # Добавление элементов на downbar_frame
         self.downbar_frame.layout = QHBoxLayout()
         self.downbar_frame.layout.setContentsMargins(10, 0, 10, 0)
         self.downbar_frame.layout.addWidget(self.text_edit)
@@ -159,6 +178,22 @@ class App(QWidget):
         self.layout.addWidget(self.downbar_frame)
         # Установка компоновщика для родительского виджета
         self.setLayout(self.layout)
+
+    def start_voice_assistant(self):
+        self.voice_thread = VoiceAssistantThread()
+        self.voice_thread.finished.connect(self.voice_assistant_finished)
+        self.voice_thread.start()
+
+    def voice_assistant_finished(self):
+        self.voice_thread = None
+
+    def closeEvent(self, event):
+        if self.voice_thread and self.voice_thread.isRunning():
+            self.voice_thread.stop()
+            self.voice_thread.finished.connect(event.accept)
+            event.ignore()
+        else:
+            event.accept()
 
 
 if __name__ == "__main__":
