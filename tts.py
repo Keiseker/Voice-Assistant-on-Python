@@ -5,12 +5,12 @@ import time
 
 language = 'ru'
 model_id = 'ru_v3'
-sample_rate = 48000  # 48000
-speaker = 'kseniya'  # aidar, baya, kseniya, xenia, random
+sample_rate = 48000
+speaker = 'kseniya'
 put_accent = True
 put_yo = True
 device = torch.device('cpu')  # cpu или gpu
-text = "Хауди Хо, друзья!!!"
+
 
 model, _ = torch.hub.load(repo_or_dir='snakers4/silero-models',
                           model='silero_tts',

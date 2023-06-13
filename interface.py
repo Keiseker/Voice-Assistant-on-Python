@@ -1,31 +1,13 @@
-from PyQt6.QtCore import Qt, QThread, pyqtSignal
-from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QListWidget, QLineEdit
-
-import recognizeNew as rn
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QListWidget, QLineEdit, QListWidgetItem
 import sys
 
 
-class VoiceAssistantThread(QThread):
-    finished = pyqtSignal()
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.stopped = False
-
-    def stop(self):
-        self.stopped = True
-
-    def run(self):
-        rn.main()
-        self.finished.emit()
-
-
 class App(QWidget):
-    def __init__(self):
-        super().__init__()
+    def setupUi(self):
 
-    # Создание основного окна
-        self.setGeometry(100, 100, 300, 500)
+        # Создание основного окна
+        self.resize(300, 500)
         self.setWindowTitle("Голосовой помощник Джарвис")
         self.setFixedSize(300, 500)
 
@@ -63,6 +45,7 @@ class App(QWidget):
         """)
         self.btn_help.setFixedSize(35, 35)
         self.btn_help.setText("?")
+        self.btn_help.clicked.connect(self.get_assistant_messages)
 
         #! Добавление элементов на upbar_frame
         self.upbar_frame.layout = QHBoxLayout()
@@ -78,6 +61,9 @@ class App(QWidget):
 
         # ? Создание text_box
         self.text_box = QListWidget()
+        self.text_box.addItem("Текст, который должен озвучиваться 1")
+        self.text_box.addItem("Текст, который должен озвучиваться 1")
+        self.text_box.addItem("Текст, который должен озвучиваться 1")
         self.text_box.setStyleSheet("""
             QTextEdit {
                 border: 1px solid #99ee44;
@@ -178,26 +164,3 @@ class App(QWidget):
         self.layout.addWidget(self.downbar_frame)
         # Установка компоновщика для родительского виджета
         self.setLayout(self.layout)
-
-    def start_voice_assistant(self):
-        self.voice_thread = VoiceAssistantThread()
-        self.voice_thread.finished.connect(self.voice_assistant_finished)
-        self.voice_thread.start()
-
-    def voice_assistant_finished(self):
-        self.voice_thread = None
-
-    def closeEvent(self, event):
-        if self.voice_thread and self.voice_thread.isRunning():
-            self.voice_thread.stop()
-            self.voice_thread.finished.connect(event.accept)
-            event.ignore()
-        else:
-            event.accept()
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = App()
-    window.show()
-    sys.exit(app.exec())
